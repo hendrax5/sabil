@@ -9,9 +9,9 @@ rest {
 
 	#
 	#  Base URI of the Next.js app.
-	#  Will be set automatically by installer to http://localhost:3000
+	#  Will be set automatically by installer to http://app:3000 in Docker
 	#
-	connect_uri = "http://localhost:3000"
+	connect_uri = "http://app:3000"
 
 	#
 	#  Authorize - dipanggil SEBELUM autentikasi untuk cek status user/voucher
