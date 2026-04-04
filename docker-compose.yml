@@ -49,8 +49,18 @@ services:
       - "1812:1812/udp"
       - "1813:1813/udp"
       - "3799:3799/udp"
+    environment:
+      - MYSQL_HOST=mariadb
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     volumes:
-      - ./salfanet-radius/freeradius-config:/etc/freeradius/3.0
+      - ./salfanet-radius/freeradius-config/clients.conf:/etc/raddb/clients.conf
+      - ./salfanet-radius/freeradius-config/mods-available/sql:/etc/raddb/mods-available/sql
+      - ./salfanet-radius/freeradius-config/mods-enabled/sql:/etc/raddb/mods-enabled/sql
+      - ./salfanet-radius/freeradius-config/sites-available/default:/etc/raddb/sites-available/default
+      - ./salfanet-radius/freeradius-config/sites-enabled/default:/etc/raddb/sites-enabled/default
+      - ./salfanet-radius/freeradius-config/clients.d:/etc/raddb/clients.d
     depends_on:
       - mariadb
 
