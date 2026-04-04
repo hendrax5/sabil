@@ -9,8 +9,8 @@ COPY ./salfanet-radius/freeradius-config/clients.d /etc/raddb/clients.d
 # Ensure the sql module is actively enabled
 RUN ln -sf /etc/raddb/mods-available/sql /etc/raddb/mods-enabled/sql
 
-# Fix permissions so the internal radius user can read the files
-RUN chown -R root:radius /etc/raddb && chmod -R 640 /etc/raddb/clients.conf /etc/raddb/mods-available/sql /etc/raddb/sites-available/default
-RUN chmod 750 /etc/raddb/clients.d && chmod 640 /etc/raddb/clients.d/* || true
+# Fix permissions globally so the internal radius user can read the files, avoiding unknown group errors
+RUN chmod -R a+r /etc/raddb/clients.conf /etc/raddb/mods-available/sql /etc/raddb/sites-available/default
+RUN chmod a+rx /etc/raddb/clients.d && chmod a+r /etc/raddb/clients.d/* || true
 
 EXPOSE 1812/udp 1813/udp 3799/udp
