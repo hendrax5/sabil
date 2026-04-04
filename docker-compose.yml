@@ -42,7 +42,9 @@ services:
       - redis_data:/data
 
   freeradius:
-    image: freeradius/freeradius-server:3.2.3-alpine
+    build:
+      context: .
+      dockerfile: freeradius.Dockerfile
     container_name: freeradius
     restart: unless-stopped
     ports:
@@ -54,13 +56,6 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
-    volumes:
-      - ./salfanet-radius/freeradius-config/clients.conf:/etc/raddb/clients.conf
-      - ./salfanet-radius/freeradius-config/mods-available/sql:/etc/raddb/mods-available/sql
-      - ./salfanet-radius/freeradius-config/mods-enabled/sql:/etc/raddb/mods-enabled/sql
-      - ./salfanet-radius/freeradius-config/sites-available/default:/etc/raddb/sites-available/default
-      - ./salfanet-radius/freeradius-config/sites-enabled/default:/etc/raddb/sites-enabled/default
-      - ./salfanet-radius/freeradius-config/clients.d:/etc/raddb/clients.d
     depends_on:
       - mariadb
 
