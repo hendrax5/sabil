@@ -3,11 +3,11 @@ sql {
     dialect = "mysql"
 
     # Connection info
-    server = "${ENV:MYSQL_HOST}"
+    server = "__DB_HOST__"
     port = 3306
-    login = "${ENV:MYSQL_USER}"
-    password = "${ENV:MYSQL_PASSWORD}"
-    radius_db = "${ENV:MYSQL_DATABASE}"
+    login = "__DB_USER__"
+    password = "__DB_PASS__"
+    radius_db = "__DB_NAME__"
 
     # Table names
     acct_table1 = "radacct"
