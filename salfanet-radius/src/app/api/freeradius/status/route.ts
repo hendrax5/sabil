@@ -24,8 +24,8 @@ export async function GET() {
 
         // Try to get FreeRADIUS process info
         try {
-            // Check systemctl status
-            const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || echo inactive');
+            // Check systemctl status or fallback to Docker compose local network port scan via netcat
+            const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || (nc -uz -w 1 freeradius 1812 && echo active) || echo inactive');
             running = statusOutput.trim() === 'active';
 
             if (running) {
