@@ -1,5 +1,5 @@
 FROM node:24-alpine AS base
-RUN apk add --no-cache libc6-compat openssl netcat-openbsd python3 make g++
+RUN apk add --no-cache libc6-compat openssl netcat-openbsd python3 make g++ docker-cli
 
 FROM base AS deps
 WORKDIR /app

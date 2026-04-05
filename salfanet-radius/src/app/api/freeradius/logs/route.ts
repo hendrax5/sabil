@@ -15,47 +15,26 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const lines = parseInt(searchParams.get('lines') || '50', 10);
 
-    // Check if log file exists
-    if (!fs.existsSync(LOG_FILE)) {
-        // Fallback for demo on Windows
-        if (process.platform === 'win32') {
-            const demoLogs = Array.from({ length: lines }, (_, i) => {
-                const date = new Date(Date.now() - i * 1000).toISOString();
-                const type = i % 10 === 0 ? 'Info' : (i % 5 === 0 ? 'Auth' : 'Debug');
-                return `${date} : ${type}: Demo log entry #${i} detailed message here...`;
-            }).reverse().join('\n');
-
-            return NextResponse.json({
-                success: true,
-                logs: demoLogs
-            });
-        }
-
-        return NextResponse.json(
-            { success: false, error: 'Log file not found' },
-            { status: 404 }
-        );
-    }
-
-    // Create promises for exec
+    // Create promises for exec (Docker Logs version)
     const readLogs = () => new Promise<string>((resolve, reject) => {
-        const tail = spawn('tail', ['-n', lines.toString(), LOG_FILE]);
+        const tail = spawn('docker', ['logs', '--tail', lines.toString(), 'freeradius']);
         let output = '';
         let error = '';
 
-        tail.stdout.on('data', (data) => {
+        tail.stdout.on('data', (data: Buffer) => {
             output += data.toString();
         });
 
-        tail.stderr.on('data', (data) => {
-            error += data.toString();
+        // Docker logs write to stderr for all daemon messages typically, we should capture them both
+        tail.stderr.on('data', (data: Buffer) => {
+            output += data.toString();
         });
 
-        tail.on('close', (code) => {
-            if (code === 0) {
+        tail.on('close', (code: number | null) => {
+            if (code === 0 || code === null) {
                 resolve(output);
             } else {
-                reject(new Error(error || `Tail process exited with code ${code}`));
+                reject(new Error(error || `Docker logs process exited with code ${code}`));
             }
         });
     });

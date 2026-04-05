@@ -13,14 +13,14 @@ export async function POST() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         // Start FreeRADIUS service
-        await execAsync('systemctl start freeradius 2>/dev/null || service freeradius start 2>/dev/null');
+        await execAsync('docker start freeradius');
 
         // Wait a moment for service to start
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Check if it's running
-        const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || echo inactive');
-        const running = statusOutput.trim() === 'active';
+        const { stdout: statusOutput } = await execAsync("docker inspect -f '{{.State.Running}}' freeradius");
+        const running = statusOutput.trim() === 'true';
 
         if (!running) {
             throw new Error('Service failed to start');

@@ -4,8 +4,6 @@ import { promisify } from 'util';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
-import dns from 'dns';
-const lookupAsync = promisify(dns.lookup);
 const execAsync = promisify(exec);
 
 export async function GET() {
@@ -24,20 +22,14 @@ export async function GET() {
         let version = '';
         let startTime = '';
         try {
-            // Try systemctl first
+            // Use docker CLI since it's now installed and socket is exposed
             let isRunningStr = 'inactive';
             try {
-                const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null');
-                isRunningStr = statusOutput.trim();
-            } catch(e) {}
-            
-            // Fallback to Native Node.js DNS resolution (Docker environments)
-            if (isRunningStr !== 'active') {
-                try {
-                    await lookupAsync('freeradius');
+                const { stdout: statusOutput } = await execAsync("docker inspect -f '{{.State.Running}}' freeradius");
+                if (statusOutput.trim() === 'true') {
                     isRunningStr = 'active';
-                } catch(e) {}
-            }
+                }
+            } catch(e) {}
             
             running = isRunningStr === 'active';
 

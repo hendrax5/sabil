@@ -21,7 +21,8 @@ export async function POST(req: Request) {
             );
         }
 
-        const command = `radtest "${username}" "${password}" ${nasIP || '127.0.0.1'} ${nasPort || 1812} "${secret || 'testing123'}"`;
+        // Execute radtest directly inside the container instance
+        const command = `docker exec freeradius radtest "${username}" "${password}" ${nasIP || '127.0.0.1'} ${nasPort || 1812} "${secret || 'testing123'}"`;
 
         // Execute radtest command
         const startTime = Date.now();
