@@ -21,10 +21,9 @@ export async function GET() {
         let memoryMB = 0;
         let version = '';
         let startTime = '';
-        // Try to get FreeRADIUS process info
         try {
-            // Check systemctl status or fallback to Docker compose local network ICMP ping
-            const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || ping -c 1 -W 1 freeradius >/dev/null 2>&1 && echo active || echo inactive');
+            // Check systemctl status or fallback to Docker compose local network DNS resolution (as ping often fails due to Alpine raw socket restrictions)
+            const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || (getent hosts freeradius >/dev/null 2>&1 && echo active) || echo inactive');
             running = statusOutput.trim() === 'active';
 
             if (running) {
