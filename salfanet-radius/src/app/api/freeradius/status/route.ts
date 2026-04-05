@@ -4,6 +4,8 @@ import { promisify } from 'util';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+import dns from 'dns';
+const lookupAsync = promisify(dns.lookup);
 const execAsync = promisify(exec);
 
 export async function GET() {
@@ -22,9 +24,22 @@ export async function GET() {
         let version = '';
         let startTime = '';
         try {
-            // Check systemctl status or fallback to Docker compose local network DNS resolution (as ping often fails due to Alpine raw socket restrictions)
-            const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null || (getent hosts freeradius >/dev/null 2>&1 && echo active) || echo inactive');
-            running = statusOutput.trim() === 'active';
+            // Try systemctl first
+            let isRunningStr = 'inactive';
+            try {
+                const { stdout: statusOutput } = await execAsync('systemctl is-active freeradius 2>/dev/null');
+                isRunningStr = statusOutput.trim();
+            } catch(e) {}
+            
+            // Fallback to Native Node.js DNS resolution (Docker environments)
+            if (isRunningStr !== 'active') {
+                try {
+                    await lookupAsync('freeradius');
+                    isRunningStr = 'active';
+                } catch(e) {}
+            }
+            
+            running = isRunningStr === 'active';
 
             if (running) {
                 // Get PID
