@@ -18,6 +18,12 @@ COPY ./salfanet-radius/freeradius-config/sites-available/coa /etc/freeradius/3.0
 COPY ./salfanet-radius/freeradius-config/policy.d/filter /etc/freeradius/3.0/policy.d/filter
 COPY ./salfanet-radius/freeradius-config/clients.d /etc/freeradius/3.0/clients.d
 
+# Force conversion of Windows UTF-16 files (e.g. edited in Notepad) to pure Unix UTF-8
+RUN apt-get install -y dos2unix && \
+    find /etc/freeradius/3.0 -type f -exec dos2unix {} + || true
+RUN iconv -f UTF-16LE -t UTF-8 /etc/freeradius/3.0/policy.d/filter -o /tmp/filter.utf8 && \
+    mv /tmp/filter.utf8 /etc/freeradius/3.0/policy.d/filter || true
+
 # Define variables available during build
 ARG DB_HOST
 ARG DB_USER
